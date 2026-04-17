@@ -1,4 +1,14 @@
+let playerScore = 0;
+let computerScore = 0;
+
 const choices = ["stone", "paper", "scissors"];
+
+const playerScoreElement = document.getElementById("playerScore");
+const computerScoreElement = document.getElementById("computerScore");
+const resultTextElement = document.getElementById("resultText");
+const stoneBtn = document.getElementById("stoneBtn");
+const paperBtn = document.getElementById("paperBtn");
+const scissorsBtn = document.getElementById("scissorsBtn");
 
 function getComputerChoice() {
   const randomIndex = Math.floor(Math.random() * choices.length);
@@ -29,17 +39,21 @@ function playGame(userChoice) {
   const computerChoice = getComputerChoice();
   const result = getResult(userChoice, computerChoice);
   
+  if (result === "win") {
+    playerScore++;
+  } else if (result === "lose") {
+    computerScore++;
+  }
+  
+  playerScoreElement.textContent = playerScore;
+  computerScoreElement.textContent = computerScore;
+  
   const displayUserChoice = capitalizeFirstLetter(userChoice);
   const displayComputerChoice = capitalizeFirstLetter(computerChoice);
   const displayResult = capitalizeFirstLetter(result);
   
-  const resultTextElement = document.getElementById("resultText");
   resultTextElement.textContent = `You chose ${displayUserChoice}, Computer chose ${displayComputerChoice} → You ${displayResult}`;
 }
-
-const stoneBtn = document.getElementById("stoneBtn");
-const paperBtn = document.getElementById("paperBtn");
-const scissorsBtn = document.getElementById("scissorsBtn");
 
 stoneBtn.addEventListener("click", () => playGame("stone"));
 paperBtn.addEventListener("click", () => playGame("paper"));
