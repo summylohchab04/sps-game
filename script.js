@@ -21,12 +21,26 @@ function getResult(userChoice, computerChoice) {
   return "lose";
 }
 
-function handlePlay(userChoice) {
-  const computerChoice = getComputerChoice();
-  const result = getResult(userChoice, computerChoice);
-  console.log(`You chose ${userChoice}, Computer chose ${computerChoice} → You ${result}`);
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-document.getElementById("stoneBtn").addEventListener("click", () => handlePlay("stone"));
-document.getElementById("paperBtn").addEventListener("click", () => handlePlay("paper"));
-document.getElementById("scissorsBtn").addEventListener("click", () => handlePlay("scissors"));
+function playGame(userChoice) {
+  const computerChoice = getComputerChoice();
+  const result = getResult(userChoice, computerChoice);
+  
+  const displayUserChoice = capitalizeFirstLetter(userChoice);
+  const displayComputerChoice = capitalizeFirstLetter(computerChoice);
+  const displayResult = capitalizeFirstLetter(result);
+  
+  const resultTextElement = document.getElementById("resultText");
+  resultTextElement.textContent = `You chose ${displayUserChoice}, Computer chose ${displayComputerChoice} → You ${displayResult}`;
+}
+
+const stoneBtn = document.getElementById("stoneBtn");
+const paperBtn = document.getElementById("paperBtn");
+const scissorsBtn = document.getElementById("scissorsBtn");
+
+stoneBtn.addEventListener("click", () => playGame("stone"));
+paperBtn.addEventListener("click", () => playGame("paper"));
+scissorsBtn.addEventListener("click", () => playGame("scissors"));
