@@ -8,22 +8,40 @@
 }
 
 body {
-    background: linear-gradient(135deg, #0f172a 0%, #3b0764 100%);
+    background: linear-gradient(-45deg, #0f172a, #3b0764, #0f2027, #203a43);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     color: #e2e8f0;
+    overflow: hidden;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.background-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 .container {
+    position: relative;
+    z-index: 1;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     padding: 2.5rem 2rem;
     border-radius: 24px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
     text-align: center;
     max-width: 600px;
     width: 90%;
@@ -34,7 +52,8 @@ h1 {
     margin-bottom: 2rem;
     font-size: 2.5rem;
     font-weight: 800;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    letter-spacing: 1px;
 }
 
 .scoreboard {
@@ -45,15 +64,17 @@ h1 {
 }
 
 .score-card {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     padding: 1.5rem 2.5rem;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     transition: transform 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .score-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
 .score-card p {
@@ -65,11 +86,23 @@ h1 {
     font-size: 0.9rem;
 }
 
-.score-card span {
+.score-number {
+    display: inline-block;
     font-size: 3rem;
     font-weight: 800;
     color: #ffffff;
-    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    text-shadow: 0 0 15px rgba(255,255,255,0.4);
+    transition: transform 0.2s ease;
+}
+
+.score-pop {
+    animation: scorePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scorePop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5); color: #a855f7; text-shadow: 0 0 20px #a855f7; }
+    100% { transform: scale(1); }
 }
 
 .buttons {
@@ -91,15 +124,32 @@ h1 {
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
     font-weight: 600;
     letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50px;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .game-btn:hover:not(:disabled) {
-    transform: translateY(-3px) scale(1.1);
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(168, 85, 247, 0.6);
+}
+
+.game-btn:hover:not(:disabled)::after {
+    opacity: 1;
 }
 
 .game-btn:active:not(:disabled) {
     transform: scale(0.95);
+    box-shadow: 0 2px 10px rgba(168, 85, 247, 0.4);
 }
 
 .game-btn:disabled {
@@ -107,86 +157,152 @@ h1 {
     cursor: not-allowed;
     background: #475569;
     box-shadow: none;
+    transform: none;
 }
 
 .result {
-    margin-bottom: 2.5rem;
-    min-height: 4rem;
+    min-height: 4.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 #resultText {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 600;
     color: #f8fafc;
     padding: 1rem 2rem;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Result Animations & Colors */
+.win-effect {
+    color: #4ade80 !important;
+    border-color: rgba(74, 222, 128, 0.5) !important;
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.3) !important;
+    animation: scaleGlow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lose-effect {
+    color: #f87171 !important;
+    border-color: rgba(248, 113, 113, 0.5) !important;
+    box-shadow: 0 0 25px rgba(248, 113, 113, 0.3) !important;
+    animation: shakeEffect 0.4s ease-in-out;
+}
+
+.draw-effect {
+    color: #fbbf24 !important;
+    border-color: rgba(251, 191, 36, 0.5) !important;
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.3) !important;
+    animation: pulseYellow 0.5s ease-in-out;
+}
+
+.thinking {
+    color: #a855f7 !important;
+    animation: pulseOpacity 1s infinite;
+}
+
+@keyframes scaleGlow {
+    0% { transform: scale(0.9); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shakeEffect {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+}
+
+@keyframes pulseYellow {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulseOpacity {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    visibility: visible;
     transition: all 0.3s ease;
 }
 
-.result-animate {
-    animation: fadeIn 0.3s ease forwards;
+.modal.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
-@keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
+.modal-content {
+    background: rgba(15, 23, 42, 0.85);
+    padding: 3rem 4rem;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
+    transform: translateY(0) scale(1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.win-text {
-    color: #4ade80 !important;
-    text-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
-    box-shadow: inset 0 0 20px rgba(74, 222, 128, 0.1);
-    border-color: rgba(74, 222, 128, 0.3) !important;
+.modal.hidden .modal-content {
+    transform: translateY(50px) scale(0.9);
 }
 
-.lose-text {
-    color: #f87171 !important;
-    text-shadow: 0 0 15px rgba(248, 113, 113, 0.4);
-    box-shadow: inset 0 0 20px rgba(248, 113, 113, 0.1);
-    border-color: rgba(248, 113, 113, 0.3) !important;
+.modal h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.3);
 }
 
-.draw-text {
-    color: #fbbf24 !important;
-    text-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
-    box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.1);
-    border-color: rgba(251, 191, 36, 0.3) !important;
-}
-
-#resetBtn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #f8fafc;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.8rem 2.5rem;
-    font-size: 1.1rem;
+.primary-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.2rem;
     border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
-    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 
-#resetBtn:hover {
-    background: rgba(239, 68, 68, 0.8);
-    border-color: transparent;
-    transform: translateY(-2px);
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+.primary-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.6);
+}
+
+.primary-btn:active {
+    transform: scale(0.95);
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 1.5rem 1rem;
+        padding: 2rem 1.5rem;
     }
     .scoreboard {
         gap: 1rem;
     }
     .score-card {
-        padding: 1rem;
+        padding: 1rem 1.5rem;
     }
     .buttons {
         flex-direction: column;
@@ -196,10 +312,14 @@ h1 {
         width: 100%;
     }
     h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
     #resultText {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         padding: 0.8rem 1rem;
+    }
+    .modal-content {
+        padding: 2rem;
+        width: 90%;
     }
 }

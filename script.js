@@ -4,9 +4,6 @@ let computerScore = parseInt(localStorage.getItem('computerScore')) || 0;
 
 const choices = ["stone", "paper", "scissors"];
 
-// Audio elements with safe relative fallback paths to avoid loud console errors 
-// if external URLs fail, although we are using data URIs of tiny blank sounds
-// to ensure it works without external dependencies directly after paste.
 const clickSound = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
 const winSound = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
 const loseSound = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
@@ -20,9 +17,14 @@ const scissorsBtn = document.getElementById("scissorsBtn");
 const resetBtn = document.getElementById("resetBtn");
 const gameButtons = [stoneBtn, paperBtn, scissorsBtn];
 
+const modal = document.getElementById("gameOverModal");
+const modalResultText = document.getElementById("modalResultText");
+
+let isThinking = false;
+
 // Initial UI update
 updateScoreUI();
-checkGameEnd();
+checkGameEndInit();
 
 function playSound(audio) {
   if (!audio.paused) {
@@ -37,10 +39,7 @@ function getComputerChoice() {
 }
 
 function getResult(userChoice, computerChoice) {
-  if (userChoice === computerChoice) {
-    return "draw";
-  }
-  
+  if (userChoice === computerChoice) return "draw";
   if (
     (userChoice === "stone" && computerChoice === "scissors") ||
     (userChoice === "scissors" && computerChoice === "paper") ||
@@ -48,7 +47,6 @@ function getResult(userChoice, computerChoice) {
   ) {
     return "win";
   }
-  
   return "lose";
 }
 
@@ -56,10 +54,16 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function animateResult() {
-  resultTextElement.classList.remove("result-animate");
-  void resultTextElement.offsetWidth; // Trigger reflow
-  resultTextElement.classList.add("result-animate");
+function triggerResultEffect(effectClass) {
+  resultTextElement.className = ""; // clear all classes
+  void resultTextElement.offsetWidth; // trigger reflow
+  resultTextElement.classList.add(effectClass);
+}
+
+function animateScore(element) {
+  element.classList.remove("score-pop");
+  void element.offsetWidth;
+  element.classList.add("score-pop");
 }
 
 function updateScoreUI() {
@@ -78,51 +82,83 @@ function setButtonsState(disabled) {
   });
 }
 
+function showModal(message) {
+  modalResultText.textContent = message;
+  modal.classList.remove("hidden");
+}
+
+function hideModal() {
+  modal.classList.add("hidden");
+}
+
+function checkGameEndInit() {
+  if (playerScore >= 5 || computerScore >= 5) {
+    setButtonsState(true);
+    if (playerScore >= 5) showModal("🎉 You Won!");
+    else showModal("💻 Computer Won!");
+  }
+}
+
 function checkGameEnd() {
   if (playerScore >= 5 || computerScore >= 5) {
     setButtonsState(true);
-    if (playerScore >= 5) {
-      resultTextElement.textContent = "🎉 You Won the Game!";
-      playSound(winSound);
-    } else {
-      resultTextElement.textContent = "💻 Computer Won the Game!";
-      playSound(loseSound);
-    }
-    animateResult();
+    setTimeout(() => {
+      if (playerScore >= 5) {
+        playSound(winSound);
+        showModal("🎉 You Won!");
+      } else {
+        playSound(loseSound);
+        showModal("💻 Computer Won!");
+      }
+    }, 600); // Wait a bit before showing modal
     return true;
   }
   return false;
 }
 
 function playGame(userChoice) {
-  if (playerScore >= 5 || computerScore >= 5) return;
+  if (playerScore >= 5 || computerScore >= 5 || isThinking) return;
   
   playSound(clickSound);
+  isThinking = true;
+  setButtonsState(true);
   
-  const computerChoice = getComputerChoice();
-  const result = getResult(userChoice, computerChoice);
-  
-  if (result === "win") {
-    playerScore++;
-    playSound(winSound);
-  } else if (result === "lose") {
-    computerScore++;
-    playSound(loseSound);
-  }
-  
-  saveScores();
-  updateScoreUI();
-  
-  if (playerScore >= 5 || computerScore >= 5) {
-    checkGameEnd();
-  } else {
+  // Computer thinking effect
+  resultTextElement.textContent = "Computer is thinking...";
+  triggerResultEffect("thinking");
+
+  setTimeout(() => {
+    const computerChoice = getComputerChoice();
+    const result = getResult(userChoice, computerChoice);
+    
+    let effectClass = "draw-effect";
+    if (result === "win") {
+      playerScore++;
+      playSound(winSound);
+      animateScore(playerScoreElement);
+      effectClass = "win-effect";
+    } else if (result === "lose") {
+      computerScore++;
+      playSound(loseSound);
+      animateScore(computerScoreElement);
+      effectClass = "lose-effect";
+    }
+    
+    saveScores();
+    updateScoreUI();
+    
     const displayUserChoice = capitalizeFirstLetter(userChoice);
     const displayComputerChoice = capitalizeFirstLetter(computerChoice);
     const displayResult = capitalizeFirstLetter(result);
     
     resultTextElement.textContent = `You chose ${displayUserChoice}, Computer chose ${displayComputerChoice} → You ${displayResult}`;
-    animateResult();
-  }
+    triggerResultEffect(effectClass);
+
+    isThinking = false;
+    if (!checkGameEnd()) {
+      setButtonsState(false);
+    }
+  }, 500);
 }
 
 function resetGame() {
@@ -131,9 +167,12 @@ function resetGame() {
   computerScore = 0;
   saveScores();
   updateScoreUI();
+  
   resultTextElement.textContent = "Choose your move!";
+  resultTextElement.className = "";
+  
   setButtonsState(false);
-  animateResult();
+  hideModal();
 }
 
 stoneBtn.addEventListener("click", () => playGame("stone"));
