@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stone Paper Scissors Game</title>
+    <title>Advanced Stone Paper Scissors</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>Stone Paper Scissors Game</h1>
+        <h1>Stone Paper Scissors</h1>
         
         <div class="scoreboard">
-            <p>Player: <span id="playerScore">0</span></p>
-            <p>Computer: <span id="computerScore">0</span></p>
+            <div class="score-card">
+                <p>Player</p>
+                <span id="playerScore">0</span>
+            </div>
+            <div class="score-card">
+                <p>Computer</p>
+                <span id="computerScore">0</span>
+            </div>
         </div>
         
         <div class="buttons">
-            <button id="stoneBtn">🪨 Stone</button>
-            <button id="paperBtn">📄 Paper</button>
-            <button id="scissorsBtn">✂️ Scissors</button>
+            <button id="stoneBtn" class="game-btn">🪨 Stone</button>
+            <button id="paperBtn" class="game-btn">📄 Paper</button>
+            <button id="scissorsBtn" class="game-btn">✂️ Scissors</button>
         </div>
         
         <div class="result">
@@ -29,5 +36,16 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        const observer = new MutationObserver(() => {
+            const text = document.getElementById('resultText').textContent.toLowerCase();
+            const el = document.getElementById('resultText');
+            el.classList.remove('win-text', 'lose-text', 'draw-text');
+            if (text.includes('win')) el.classList.add('win-text');
+            else if (text.includes('lose') || text.includes('lost')) el.classList.add('lose-text');
+            else if (text.includes('draw')) el.classList.add('draw-text');
+        });
+        observer.observe(document.getElementById('resultText'), { childList: true, characterData: true, subtree: true });
+    </script>
 </body>
 </html>
